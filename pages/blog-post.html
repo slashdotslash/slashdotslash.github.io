@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MishaOcaml | Почему Arduino медленная?</title>
+  <meta name="description" content="Почему Arduino медленная?">
+  <link rel="stylesheet" href="../css/myco.css">
+</head>
+<body>
+<main class="main-width wiki-blog">
+  <nav class="blog-site-nav" aria-label="Навигация блога">
+    <a class="blog-site-nav__brand" href="blog-home.html">MishaOcaml</a>
+    <a href="blog-posts.html">Записи</a>
+    <a href="../pages/wiki-list.html">Вики</a>
+    <span class="blog-site-nav__spacer"></span>
+    <button id="theme-toggle" class="btn btn_icon" type="button" aria-label="Переключить тему"><span data-icon="moon"></span></button>
+  </nav>
+  <h1 class="navi-title">
+    <a href="blog-home.html"><span aria-hidden="true" class="navi-title__colon">:</span> Блог</a>
+    <span class="navi-title__separator">/</span>
+    <a href="blog-post.html" rel="bookmark">Почему Arduino медленная?</a>
+  </h1>
+
+  <article class="article mycomarkup-doc">
+    <div class="post-meta">
+      <span>18.03.2024</span>
+      <span>Михаил Л. aka dx3mod</span>
+    </div>
+
+    <p>Капаюсь в исходниках и делюсь эмоциями.</p>
+
+    <hr>
+
+    <p>Если вы знакомы с платформой Arduino, то наверняка слышали тезис, что Arduino медленная. В принципе вы и сами могли наблюдать, что даже самая простая программа парой выходит в килобайты прошивки.</p>
+
+    <p>Но почему это так? Зачастую от экспертов из Сети можно прочитать ответ, мол там куча мифических проверок от дурака и прочей шляпы. Звучит, как минимум, убедительно. По крайней мере потому что Arduino и позиционируется как платформа для новичков, и там должны быть некоторые предохранители, должны же быть, да?</p>
+
+    <p>Вопрос интересный и к тому же (на тот момент) я писал свой Arduino-подобный HAL для решения практических работа в техникуме, из-за чего и решил повозиться немного в исходниках.</p>
+
+    <p>Плюс к этому я надеюсь, что у меня получиться осветить данный вопрос в этой статье.</p>
+
+    <h2 id="akhtung">Ахтунг <a class="heading__link" href="#akhtung"></a></h2>
+
+    <p>Говоря Arduino, я говорю про Arduino HAL и про конкретную реализацию — ArduinoCore-avr, так как остальные решения могут иметь существенные изменения.</p>
+
+    <p>Также я предполагаю, что вы владеете некоторыми терминами, языком Cи в некоторой степени Arduino.</p>
+
+    <h2 id="blink">Ещё одно мигание светодиода <a class="heading__link" href="#blink"></a></h2>
+
+    <p>Разбирать Arduino я предлагаю на простом боевом примере, на blink'е.</p>
+
+    <pre class="codeblock"><code class="language-c">#define LED 7
+
+void setup() {
+    pinMode(LED, OUTPUT);
+}
+
+void loop() {
+    digitalWrite(LED, HIGH);
+    delay(1000);
+    digitalWrite(LED, LOW);
+    delay(1000);
+}</code></pre>
+
+    <p>И собирать его мы будем для платы Arduino Uno, на борту которой находиться микроконтроллер ATmega328p. Самый типичный набор.</p>
+
+    <p>Если мы сейчас скомпилируем это программу, то скомпилированная прошивка выйдет в 924 байта (в 2% от общего объёма flash-памяти).</p>
+
+    <p>И тут вопрос, что же там такого, что код на 10 строчек занимает под килобайт flash-памяти?</p>
+
+    <h3 id="firmware">Внутрь прошивки <a class="heading__link" href="#firmware"></a></h3>
+
+    <p>В принципе мы можем это посмотреть дизассемблером. Полный листинг можете найти тут. А я попробую пошагово объяснить, что там происходит.</p>
+
+    <h4 id="vectors">Вектор прерываний <a class="heading__link" href="#vectors"></a></h4>
+
+    <p>В самом начале прошивки (нулевой адрес) определяется вектор прерываний, именно с него микроконтроллер начинает исполнять инструкцию за инструкцией.</p>
+
+    <p>По сути вектор прерываний это просто пару десятков строк безусловных переходов (прыжки aka джампы), большая часть которых ведёт на обработчик <code>__bad_interrupt</code>.</p>
+
+    <pre class="codeblock"><code>00000000 &lt;__vectors&gt;:
+   0:	0c 94 5c 00 	jmp	0xb8	; 0xb8 &lt;__ctors_end&gt;
+   4:	0c 94 6e 00 	jmp	0xdc	; 0xdc &lt;__bad_interrupt&gt;
+   8:	0c 94 6e 00 	jmp	0xdc	; 0xdc &lt;__bad_interrupt&gt;
+   c:	0c 94 6e 00 	jmp	0xdc	; 0xdc &lt;__bad_interrupt&gt;
+  10:	0c 94 6e 00 	jmp	0xdc	; 0xdc &lt;__bad_interrupt&gt;</code></pre>
+
+    <p>Обработчик <code>__bad_interrupt</code>, как понятно из названия, просто заглушка для неопределённых пользователем прерываний, которая перенаправляет на начало вектора.</p>
+
+    <h4 id="main">Функция main <a class="heading__link" href="#main"></a></h4>
+
+    <p>В результате после всех предыдущих шагов мы попали в функцию <code>main</code>, в точку входа в программу. Но, как мы понимаем, не в наш скетч, а в Arduino.</p>
+
+    <p>И это время второго уровню инициализации, инициализации Arduino-окружения. И это достаточно большой кусок прошивки, ибо здесь настраиваются прерывания, таймер-счётчик для подсчёта времени, serial-порт и подобные вещи.</p>
+
+    <h2 id="core">Погружение в ArduinoCore-avr <a class="heading__link" href="#core"></a></h2>
+
+    <p>К счастью, Arduino это проект с открытым исходном кодом, благодаря чему мы можем изучить его в исходном виде.</p>
+
+    <p>По приведённой ссылки вы можете найти репозиторий ArduinoCore-avr, ядра Arduino под микроконтроллеры AVR. В терминах Arduino, ядро это реализация Arduino API (абстрактного интерфейса) под конкретную платформу.</p>
+
+    <h3 id="bottleneck">Находим bottleneck <a class="heading__link" href="#bottleneck"></a></h3>
+
+    <p>Опять же, к нашему счастью, чтобы понять, почему всё так медленно достаточно взглянуть на реализацию функции <code>digitalWrite</code>.</p>
+
+    <pre class="codeblock"><code class="language-c">void digitalWrite(uint8_t pin, uint8_t val)
+{
+	uint8_t timer = digitalPinToTimer(pin);
+	uint8_t bit = digitalPinToBitMask(pin);
+	uint8_t port = digitalPinToPort(pin);
+	volatile uint8_t *out;
+
+	if (port == NOT_A_PIN) return;
+
+	if (timer != NOT_ON_TIMER) turnOffPWM(timer);
+
+	out = portOutputRegister(port);
+
+	uint8_t oldSREG = SREG;
+	cli();
+
+	if (val == LOW) {
+		*out &= ~bit;
+	} else {
+		*out |= bit;
+	}
+
+	SREG = oldSREG;
+}</code></pre>
+
+    <p>Что же тут такого интересного, к чему столько много ужасного кода?</p>
+
+    <p>Ну во-первых у нас происходит отображение (aka mapping) виртуальных пинов на физические ресурсы. Чтобы сформировать цифровой сигнал на контакте микроконтроллера, надо в определённый бит регистра записать нужное значение.</p>
+
+    <h3 id="real-bottleneck">Настоящий bottleneck <a class="heading__link" href="#real-bottleneck"></a></h3>
+
+    <p>Если компилятор способен оптимизировать этот код, так почему у него ничего не получается?</p>
+
+    <p>Чтобы статически (на этапе компиляции) произвести вычисления компилятор должен собственно знать статически все значения. В нашем случае нам всё известно, и виртуальный пин (<code>7</code>) и логический уровень (лог. <code>1</code>).</p>
+
+    <p>Поэтому в поисках узкого места обратимся к механизму маппинга. Возьмём код отображения пина на порт ввода-вывода.</p>
+
+    <pre class="codeblock"><code class="language-c">#define digitalPinToPort(P) ( pgm_read_byte( digital_pin_to_port_PGM + (P) ) )</code></pre>
+
+    <p>Да тут же чтение из flash-памяти! А это значит, что эти данные как-бы не часть программы, про которые компилятору нельзя ничего предполагать. И он обязан по настоящему их прочитать из flash-памяти.</p>
+
+    <p>В итоге компилятор не может свернуть весь этот код. К тому же, как думаете, что будет если передать в качестве пина значение, выходящие за пределы массива <code>digital_pin_to_port_PGM</code>? Верно, неопределенное поведение!</p>
+
+    <h3 id="fix">Правим беспорядок <a class="heading__link" href="#fix"></a></h3>
+
+    <p>Теперь зная источник проблемы мы можем попробовать исправить всё это безобразие, написав свой эффективный <code>digitalWrite</code> и <code>pinMode</code>.</p>
+
+    <pre class="codeblock"><code class="language-c">namespace fast {
+
+struct IoPort {
+  volatile uint8_t* ddr;
+  volatile uint8_t* port;
+  volatile uint8_t* pin;
+};
+
+void digitalWrite(const uint8_t pin, const bool val) {
+  IoPort* const ioport = mapPinToIoPort(pin);
+  if (ioport == NULL) return;
+
+  const uint8_t bit = mapPinToBit(pin);
+
+  if (val)
+    *ioport->port &= ~bit;
+  else
+    *ioport->port |= bit;
+}
+
+}</code></pre>
+
+    <p>Немного магии и теперь blink занимает 642 байта: 444 из которых footprint (и мёртвого кода), 191 delay и наших 8 байт (один <code>pinMode</code> и два <code>digitalWrite</code>)!</p>
+
+    <p>Неплохая оптимизация, да?</p>
+
+    <h2 id="conclusion">Заключение <a class="heading__link" href="#conclusion"></a></h2>
+
+    <p>Изначально я хотел ещё рассказать про то, что хоть у нас и получилось оптимизировать базовые Arduino-абстракции это не победа и всё такое. И что с такими примитивными абстракциями как в Arduino каши не сваришь.</p>
+
+    <p>Но, думаю, это оставлю (в лучшем случае) для последующих статей.</p>
+  </article>
+
+  <hr>
+
+  <section class="prevnext">
+    <a class="prevnext__el prevnext__prev" href="blog-posts.html" rel="prev">← Все записи</a>
+    <a class="prevnext__el prevnext__next" href="blog-post-rpm.html" rel="next">Исследуем формат RPM файлов</a>
+  </section>
+
+  <nav class="hypha-info" aria-label="Метаданные записи">
+    <ul class="hypha-info__list">
+      <li class="hypha-info__entry">
+        <a class="hypha-info__link" href="blog-posts.html">Архив</a>
+      </li>
+      <li class="hypha-info__entry">
+        <a class="hypha-info__link" href="https://github.com/dx3mod">Автор</a>
+      </li>
+    </ul>
+  </nav>
+</main>
+<script src="../js/icons.js"></script>
+<script src="../js/highlight.js"></script>
+<script src="../js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MishaOcaml | Исследуем формат RPM файлов</title>
+  <meta name="description" content="Исследуем формат RPM файлов">
+  <link rel="stylesheet" href="../css/myco.css">
+</head>
+<body>
+<main class="main-width wiki-blog">
+  <nav class="blog-site-nav" aria-label="Навигация блога">
+    <a class="blog-site-nav__brand" href="blog-home.html">MishaOcaml</a>
+    <a href="blog-posts.html">Записи</a>
+    <a href="../pages/wiki-list.html">Вики</a>
+    <span class="blog-site-nav__spacer"></span>
+    <button id="theme-toggle" class="btn btn_icon" type="button" aria-label="Переключить тему"><span data-icon="moon"></span></button>
+  </nav>
+  <h1 class="navi-title">
+    <a href="blog-home.html"><span aria-hidden="true" class="navi-title__colon">:</span> Блог</a>
+    <span class="navi-title__separator">/</span>
+    <a href="blog-post-rpm.html" rel="bookmark">Исследуем формат RPM файлов</a>
+  </h1>
+
+  <article class="article mycomarkup-doc">
+    <div class="post-meta">
+      <span>28.03.2024</span>
+      <span>Михаил Л. aka dx3mod</span>
+    </div>
+
+    <p>Не так давно я завершил написание парсера RPM пакетов и хочу поделиться наблюдениями о структуре формата.</p>
+
+    <h2>Формат</h2>
+    <p>RPM (RPM Package Manager) — это формат пакетов, используемый в некоторых дистрибутивах Linux. Он содержит мета-информацию и payload (обычно cpio-архив), часто сжатый.</p>
+
+    <h3>Секция Lead</h3>
+    <p>Файл начинается с четырёх магических байтов и набора фиксированных полей: версия формата, тип пакета, архитектура, имя файла и т.д.</p>
+
+    <h3>Сигнатура и заголовок</h3>
+    <p>Основная структура заголовка — это индекс записей, массив записей и секция данных. Каждая запись описывает тег, тип, смещение и количество элементов.</p>
+
+    <h3>Payload</h3>
+    <p>Полезная нагрузка обычно содержит сжатый cpio-архив с файлами пакета. Заголовок содержит теги, указывающие формат архива и алгоритм сжатия.</p>
+
+    <h2>Пример и детали</h2>
+    <p>Внутри заголовков используются поля с выравниванием и таблицы записей, что требует аккуратной работы при парсинге. Для практического разбора можно посмотреть исходник парсера.</p>
+
+  </article>
+
+  <section class="prevnext">
+    <a class="prevnext__el prevnext__prev" href="blog-post.html" rel="prev">← Почему Arduino медленная?</a>
+    <a class="prevnext__el prevnext__next" href="blog-posts.html" rel="next">Все записи →</a>
+  </section>
+
+  <nav class="hypha-info" aria-label="Метаданные записи">
+    <ul class="hypha-info__list">
+      <li class="hypha-info__entry">
+        <a class="hypha-info__link" href="blog-posts.html">Архив</a>
+      </li>
+      <li class="hypha-info__entry">
+        <a class="hypha-info__link" href="https://github.com/dx3mod">Автор</a>
+      </li>
+    </ul>
+  </nav>
+</main>
+<script src="../js/icons.js"></script>
+<script src="../js/highlight.js"></script>
+<script src="../js/theme.js"></script>
+</body>
+</html>
