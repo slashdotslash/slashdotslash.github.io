@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MishaOcaml — Вики</title>
+  <meta name="description" content="Главная страница вики MishaOcaml">
+  <link rel="stylesheet" href="../css/myco.css">
+</head>
+<body>
+<header>
+  <nav class="main-width top-bar">
+    <ul class="top-bar__wrapper">
+      <li class="top-bar__section top-bar__section_home">
+        <div class="top-bar__home-link-wrapper">
+          <a class="top-bar__home-link" href="../index.html">MishaOcaml</a>
+        </div>
+      </li>
+      <li class="top-bar__section top-bar__section_search">
+        <form class="top-bar__search" action="wiki-list.html">
+          <input type="search" class="top-bar__search-bar" name="q" placeholder="Search wiki…" aria-label="Search wiki">
+        </form>
+      </li>
+      <li class="top-bar__section top-bar__section_highlights">
+        <ul class="top-bar__highlights">
+          <li class="top-bar__highlight"><a class="top-bar__highlight-link" href="wiki-list.html">All pages</a></li>
+          <li class="top-bar__highlight"><a class="top-bar__highlight-link" href="wiki-history.html">History</a></li>
+        </ul>
+      </li>
+      <li class="top-bar__section top-bar__section_auth">
+        <ul class="auth-links">
+          <li class="auth-links__box"><a class="auth-links__link" href="#">Login</a></li>
+          <li class="auth-links__box"><a class="auth-links__link" href="#">Register</a></li>
+        </ul>
+      </li>
+      <li class="top-bar__section top-bar__section_theme">
+        <button id="theme-toggle" class="btn btn_icon" type="button" aria-label="Переключить тему">
+          <span data-icon="moon"></span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</header>
+<main class="main-width">
+  <h1>Вики MishaOcaml</h1>
+  <p>Добро пожаловать в вики. Список статей — <a href="wiki-list.html">здесь</a>.</p>
+</main>
+<script src="../js/icons.js"></script>
+<script src="../js/highlight.js"></script>
+<script src="../js/theme.js"></script>
+</body>
+</html>

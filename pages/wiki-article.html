@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MishaOcaml — Миша и OCaml</title>
+  <meta name="description" content="Вики-статья про Мишу и OCaml">
+  <link rel="stylesheet" href="../css/myco.css">
+</head>
+<body>
+<header>
+  <nav class="main-width top-bar">
+    <ul class="top-bar__wrapper">
+      <li class="top-bar__section top-bar__section_home">
+        <div class="top-bar__home-link-wrapper">
+          <a class="top-bar__home-link" href="../index.html">MishaOcaml</a>
+        </div>
+      </li>
+      <li class="top-bar__section top-bar__section_search">
+        <form class="top-bar__search" action="wiki-list.html">
+          <input type="search" class="top-bar__search-bar" name="q" placeholder="Search wiki…" aria-label="Search wiki">
+        </form>
+      </li>
+      <li class="top-bar__section top-bar__section_highlights">
+        <ul class="top-bar__highlights">
+          <li class="top-bar__highlight"><a class="top-bar__highlight-link" href="wiki-list.html">All pages</a></li>
+          <li class="top-bar__highlight"><a class="top-bar__highlight-link" href="wiki-history.html">History</a></li>
+        </ul>
+      </li>
+      <li class="top-bar__section top-bar__section_auth">
+        <ul class="auth-links">
+          <li class="auth-links__box"><a class="auth-links__link" href="#">Login</a></li>
+          <li class="auth-links__box"><a class="auth-links__link" href="#">Register</a></li>
+        </ul>
+      </li>
+      <li class="top-bar__section top-bar__section_theme">
+        <button id="theme-toggle" class="btn btn_icon" type="button" aria-label="Переключить тему">
+          <span data-icon="moon"></span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</header>
+<main class="main-width">
+  <section id="hypha">
+    <h1 class="navi-title">
+      <a href="#"><span aria-hidden="true" class="navi-title__colon">:</span></a>
+      <a href="#" rel="bookmark">Миша и OCaml</a>
+    </h1>
+
+    <article class="article mycomarkup-doc">
+      <p>
+        <strong>Миша</strong> проснулся, увидел OCaml и понял, что теперь всё его мышление — это один большой <code>match</code>. Он пишет на OCaml, мечтает на OCaml и аккуратно складывает типы в тумбочку.
+      </p>
+
+      <h2 id="Pochemu_OCaml_krutoy">
+        Почему OCaml такой крутой
+        <a class="heading__link" href="#Pochemu_OCaml_krutoy"></a>
+      </h2>
+
+      <ul>
+        <li class="item_unordered">
+          <p><strong>Типы</strong> — OCaml знает, что ты делаешь, ещё до того как ты сам это понял. Миша плакал от счастья, когда компилятор нашёл баг за три секунды до деплоя.</p>
+        </li>
+        <li class="item_unordered">
+          <p><strong>Pattern matching</strong> — это не парсинг, это философия. Миша матчит на завтрак, на обед и на то, что Python опять где-то упал.</p>
+        </li>
+        <li class="item_unordered">
+          <p><strong>Модули и функторы</strong> — абстракция настолько элегантная, что Миша пытался объяснить это коту. Кот стал программистом.</p>
+        </li>
+        <li class="item_unordered">
+          <p><strong>Производительность</strong> — нативный код, без сюрпризов. В отличие от жизни Миши до OCaml.</p>
+        </li>
+      </ul>
+
+      <h2 id="Primer_ot_Mishi">
+        Пример от Миши
+        <a class="heading__link" href="#Primer_ot_Mishi"></a>
+      </h2>
+
+      <pre class="codeblock"><code class="language-ocaml">let rec skolko_raz_misha_skazal k = if k <= 0 then 0 else 1 + skolko_raz_misha_skazal (k - 1)
+
+let () = Printf.printf "Миша сказал это %d раз\n" (skolko_raz_misha_skazal 1000)</code></pre>
+
+      <p>Миша утверждает, что 1000 — это минимум.</p>
+
+      <div class="transclusion transclusion_stand-out">
+        <a class="transclusion__link" href="wiki-list.html">Связанные статьи</a>
+        <div class="transclusion__content">
+          <p>Продолжение темы можно найти в заметках о модулях, функторах и системе типов.</p>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="prevnext">
+    <a class="prevnext__el prevnext__prev" href="wiki-list.html" rel="prev">← Все гифы</a>
+    <a class="prevnext__el prevnext__next" href="wiki-history.html" rel="next">История изменений →</a>
+  </section>
+
+  <nav class="hypha-info" aria-label="Действия со статьёй">
+    <ul class="hypha-info__list">
+      <li class="hypha-info__entry"><a class="hypha-info__link" href="wiki-history.html">История</a></li>
+      <li class="hypha-info__entry"><a class="hypha-info__link" href="#">Переименовать</a></li>
+      <li class="hypha-info__entry"><a class="hypha-info__link" href="#">Удалить</a></li>
+      <li class="hypha-info__entry"><a class="hypha-info__link" href="#">Исходный текст</a></li>
+    </ul>
+  </nav>
+
+</main>
+<script src="../js/icons.js"></script>
+<script src="../js/highlight.js"></script>
+<script src="../js/theme.js"></script>
+</body>
+</html>
